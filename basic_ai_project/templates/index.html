@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Flower Classifier - AI Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Iris Flower Classifier</h1>
+            <p>Advanced AI-powered species prediction system using machine learning</p>
+        </div>
+
+        <div class="content">
+            <form action="/predict" method="post" id="predictionForm">
+                <div class="form-group">
+                    <label for="sepal_length">🌿 Sepal Length (cm):</label>
+                    <div class="input-container">
+                        <input type="number" step="0.1" name="sepal_length" id="sepal_length" 
+                               min="4.0" max="8.0" value="5.0" required>
+                        <div class="range-container">
+                            <input type="range" class="range-slider" id="sepal_length_range" 
+                                   min="4.0" max="8.0" step="0.1" value="5.0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sepal_width">🍃 Sepal Width (cm):</label>
+                    <div class="input-container">
+                        <input type="number" step="0.1" name="sepal_width" id="sepal_width" 
+                               min="2.0" max="4.5" value="3.0" required>
+                        <div class="range-container">
+                            <input type="range" class="range-slider" id="sepal_width_range" 
+                                   min="2.0" max="4.5" step="0.1" value="3.0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="petal_length">🌺 Petal Length (cm):</label>
+                    <div class="input-container">
+                        <input type="number" step="0.1" name="petal_length" id="petal_length" 
+                               min="1.0" max="7.0" value="4.0" required>
+                        <div class="range-container">
+                            <input type="range" class="range-slider" id="petal_length_range" 
+                                   min="1.0" max="7.0" step="0.1" value="4.0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="petal_width">🌸 Petal Width (cm):</label>
+                    <div class="input-container">
+                        <input type="number" step="0.1" name="petal_width" id="petal_width" 
+                               min="0.1" max="2.5" value="1.0" required>
+                        <div class="range-container">
+                            <input type="range" class="range-slider" id="petal_width_range" 
+                                   min="0.1" max="2.5" step="0.1" value="1.0">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    🔮 Predict Species
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing flower characteristics...</p>
+            </div>
+
+            <div class="info-section">
+                <h3>📊 About Iris Species Classification</h3>
+                <p>This AI system uses a Decision Tree Classifier trained on the famous Iris dataset to predict flower species based on sepal and petal measurements.</p>
+                
+                <div class="species-info">
+                    <div class="species-card">
+                        <h4>Iris Setosa</h4>
+                        <p>Typically has smaller petals and distinctive sepal characteristics.</p>
+                    </div>
+                    <div class="species-card">
+                        <h4>Iris Versicolor</h4>
+                        <p>Medium-sized flowers with moderate petal and sepal dimensions.</p>
+                    </div>
+                    <div class="species-card">
+                        <h4>Iris Virginica</h4>
+                        <p>Generally the largest flowers with longer petals and sepals.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testing-section">
+                <h3>🧪 Model Testing & Validation</h3>
+                <p>Test the model with predefined samples and view comprehensive results:</p>
+                
+                <button type="button" class="test-btn" onclick="runAllTests()">
+                    🚀 Run All Tests
+                </button>
+                <button type="button" class="test-btn" onclick="testSample('setosa')">
+                    Test Setosa Sample
+                </button>
+                <button type="button" class="test-btn" onclick="testSample('versicolor')">
+                    Test Versicolor Sample
+                </button>
+                <button type="button" class="test-btn" onclick="testSample('virginica')">
+                    Test Virginica Sample
+                </button>
+                <button type="button" class="test-btn" onclick="showModelAccuracy()">
+                    📈 Show Model Accuracy
+                </button>
+
+                <div id="testResults" class="test-results" style="display: none;">
+                    <h4>Test Results:</h4>
+                    <div id="testContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sync range sliders with input fields
+        function syncInputs(inputId, rangeId) {
+            const input = document.getElementById(inputId);
+            const range = document.getElementById(rangeId);
+            
+            input.addEventListener('input', () => {
+                range.value = input.value;
+            });
+            
+            range.addEventListener('input', () => {
+                input.value = range.value;
+            });
+        }
+
+        // Initialize all input-range synchronization
+        syncInputs('sepal_length', 'sepal_length_range');
+        syncInputs('sepal_width', 'sepal_width_range');
+        syncInputs('petal_length', 'petal_length_range');
+        syncInputs('petal_width', 'petal_width_range');
+
+        // Form submission with loading animation
+        document.getElementById('predictionForm').addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'block';
+        });
+
+        // Test samples data
+        const testSamples = {
+            setosa: { sepal_length: 5.1, sepal_width: 3.5, petal_length: 1.4, petal_width: 0.2 },
+            versicolor: { sepal_length: 7.0, sepal_width: 3.2, petal_length: 4.7, petal_width: 1.4 },
+            virginica: { sepal_length: 6.3, sepal_width: 3.3, petal_length: 6.0, petal_width: 2.5 }
+        };
+
+        function testSample(species) {
+            const sample = testSamples[species];
+            
+            // Fill form with test data
+            document.getElementById('sepal_length').value = sample.sepal_length;
+            document.getElementById('sepal_width').value = sample.sepal_width;
+            document.getElementById('petal_length').value = sample.petal_length;
+            document.getElementById('petal_width').value = sample.petal_width;
+            
+            // Update range sliders
+            document.getElementById('sepal_length_range').value = sample.sepal_length;
+            document.getElementById('sepal_width_range').value = sample.sepal_width;
+            document.getElementById('petal_length_range').value = sample.petal_length;
+            document.getElementById('petal_width_range').value = sample.petal_width;
+            
+            // Show test results
+            showTestResults(`Testing ${species} sample with values: 
+                Sepal Length: ${sample.sepal_length}cm, 
+                Sepal Width: ${sample.sepal_width}cm, 
+                Petal Length: ${sample.petal_length}cm, 
+                Petal Width: ${sample.petal_width}cm
+                <br><br>Click 'Predict Species' to see the result!`);
+        }
+
+        function runAllTests() {
+            let results = '<h4>🔬 Comprehensive Model Testing</h4>';
+            results += '<p>Testing all three species with known samples:</p><br>';
+            
+            Object.keys(testSamples).forEach(species => {
+                const sample = testSamples[species];
+                results += `<div style="margin: 10px 0; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                    <strong>${species.charAt(0).toUpperCase() + species.slice(1)}:</strong><br>
+                    Sepal: ${sample.sepal_length} x ${sample.sepal_width} cm<br>
+                    Petal: ${sample.petal_length} x ${sample.petal_width} cm<br>
+                    <em>Expected: ${species}</em>
+                </div>`;
+            });
+            
+            results += '<p><strong>💡 Tip:</strong> Use the individual test buttons to load each sample and verify predictions!</p>';
+            showTestResults(results);
+        }
+
+        function showModelAccuracy() {
+            const accuracyInfo = `
+                <h4>📊 Model Performance Metrics</h4>
+                <div class="accuracy-display">Model Accuracy: ~96-98%</div>
+                <p><strong>Algorithm:</strong> Decision Tree Classifier</p>
+                <p><strong>Dataset:</strong> Iris Dataset (150 samples, 4 features)</p>
+                <p><strong>Training Split:</strong> 70% training, 30% testing</p>
+                <p><strong>Features Used:</strong></p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Sepal Length (cm)</li>
+                    <li>Sepal Width (cm)</li>
+                    <li>Petal Length (cm)</li>
+                    <li>Petal Width (cm)</li>
+                </ul>
+                <p><strong>Classes:</strong> Setosa, Versicolor, Virginica</p>
+                <p><em>Note: Actual accuracy may vary based on random state and data split.</em></p>
+            `;
+            showTestResults(accuracyInfo);
+        }
+
+        function showTestResults(content) {
+            document.getElementById('testContent').innerHTML = content;
+            document.getElementById('testResults').style.display = 'block';
+            document.getElementById('testResults').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

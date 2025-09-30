@@ -1,5 +1,6 @@
-# TODO for Basic AI Project
+# TODO for Basic AI Project Extension to Web App
 
-- [x] Create requirements.txt in basic_ai_project/ with scikit-learn dependency
-- [x] Create main.py in basic_ai_project/ with ML script using Iris dataset and DecisionTreeClassifier
-- [x] Create README.md in basic_ai_project/ with setup and run instructions
+- [x] Update requirements.txt to include flask and joblib
+- [x] Modify main.py to train and save the model using joblib
+- [x] Create app.py with Flask routes for input form and prediction
+- [x] Update README.md with web app setup and run instructions

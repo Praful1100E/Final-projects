@@ -2,6 +2,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+import joblib
 
 # Load the Iris dataset
 iris = load_iris()
@@ -14,6 +15,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 # Create and train the Decision Tree Classifier
 clf = DecisionTreeClassifier(random_state=42)
 clf.fit(X_train, y_train)
+
+# Save the trained model
+joblib.dump(clf, 'model.pkl')
+joblib.dump(iris.target_names, 'target_names.pkl')
 
 # Make predictions on the test set
 y_pred = clf.predict(X_test)
