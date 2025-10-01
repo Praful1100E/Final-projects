@@ -181,17 +181,17 @@
         function runAllTests() {
             let results = '<h4>🔬 Comprehensive Model Testing</h4>';
             results += '<p>Testing all three species with known samples:</p><br>';
-
+            
             Object.keys(testSamples).forEach(species => {
                 const sample = testSamples[species];
-                results += `<div style="margin: 10px 0; padding: 10px; background: #1a1a2e; border-radius: 5px; color: #e0e0e0;">
+                results += `<div style="margin: 10px 0; padding: 10px; background: #f0f8ff; border-radius: 5px;">
                     <strong>${species.charAt(0).toUpperCase() + species.slice(1)}:</strong><br>
                     Sepal: ${sample.sepal_length} x ${sample.sepal_width} cm<br>
                     Petal: ${sample.petal_length} x ${sample.petal_width} cm<br>
                     <em>Expected: ${species}</em>
                 </div>`;
             });
-
+            
             results += '<p><strong>💡 Tip:</strong> Use the individual test buttons to load each sample and verify predictions!</p>';
             showTestResults(results);
         }
