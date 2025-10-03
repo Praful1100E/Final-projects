@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TaskMaster Todo List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a23;
+      color: #e0e0e0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #12122e;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.7);
+    }
+
+    .sidebar .logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #4fc3f7;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar .logo svg {
+      width: 28px;
+      height: 28px;
+      fill: #4fc3f7;
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .nav-links li {
+      margin-bottom: 15px;
+    }
+
+    .nav-links button {
+      width: 100%;
+      background: #1a1a3d;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 15px;
+      color: #b0b0c8;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      position: relative;
+    }
+
+    .nav-links button.active,
+    .nav-links button:hover {
+      background: #2a2a5a;
+      color: #4fc3f7;
+    }
+
+    .nav-links button .badge {
+      background: #4fc3f7;
+      color: #0a0a23;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: auto;
+    }
+
+    /* Main content */
+    .main-content {
+      flex-grow: 1;
+      padding: 30px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #0a0a23 0%, #12122e 100%);
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h2 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 300px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      border-radius: 20px;
+      border: none;
+      background: #1a1a3d;
+      color: #e0e0e0;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 10px #4fc3f7;
+      transition: box-shadow 0.3s;
+    }
+
+    .search-bar input::placeholder {
+      color: #7a7a9d;
+    }
+
+    .search-bar svg {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      fill: #4fc3f7;
+      pointer-events: none;
+    }
+
+    /* Task list */
+    .task-list {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .task-card {
+      background: #1a1a3d;
+      border-radius: 12px;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+      transition: box-shadow 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .task-card:hover {
+      box-shadow: 0 0 25px rgba(79, 195, 247, 0.6);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+    }
+
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #4fc3f7;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .checkbox.checked {
+      background: #4fc3f7;
+      border-color: #4fc3f7;
+    }
+
+    .checkbox.checked::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      width: 6px;
+      height: 12px;
+      border: solid #0a0a23;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .task-text {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      user-select: none;
+      flex-grow: 1;
+      transition: color 0.3s;
+    }
+
+    .task-text.completed {
+      color: #7a7a9d;
+      text-decoration: line-through;
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+
+    .task-actions button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-actions button:hover {
+      background: rgba(79, 195, 247, 0.3);
+    }
+
+    .task-actions svg {
+      width: 20px;
+      height: 20px;
+      fill: #4fc3f7;
+    }
+
+    /* Projects section */
+    .projects-section {
+      margin-top: 40px;
+    }
+
+    .projects-section h3 {
+      font-weight: 700;
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+
+    .projects-list {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .project-card {
+      background: #1a1a3d;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+      cursor: pointer;
+      flex: 1 1 150px;
+      max-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: box-shadow 0.3s;
+    }
+
+    .project-card:hover {
+      box-shadow: 0 0 25px rgba(79, 195, 247, 0.6);
+    }
+
+    .project-icon {
+      width: 28px;
+      height: 28px;
+      fill: #4fc3f7;
+      flex-shrink: 0;
+    }
+
+    .project-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #e0e0e0;
+      user-select: none;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      margin-top: 20px;
+      height: 8px;
+      background: #12122e;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 0 5px rgba(79, 195, 247, 0.5);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4fc3f7, #1a9fff);
+      width: 50%;
+      transition: width 0.4s ease;
+    }
+
+    /* Floating add button */
+    .add-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: #4fc3f7;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #4fc3f7;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.3s;
+      z-index: 100;
+    }
+
+    .add-button:hover {
+      box-shadow: 0 0 30px #1a9fff;
+    }
+
+    .add-button svg {
+      width: 28px;
+      height: 28px;
+      fill: #0a0a23;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #12122e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #4fc3f7;
+      border-radius: 4px;
+    }
+
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>
+      TaskMaster
+    </div>
+    <ul class="nav-links">
+      <li><button class="active">Inbox <span class="badge">4</span></button></li>
+      <li><button>Today <span class="badge">3</span></button></li>
+      <li><button>Upcoming <span class="badge">1</span></button></li>
+      <li><button>Projects</button></li>
+      <li><button>Tags</button></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="header">
+      <h2>Today</h2>
+      <div class="search-bar">
+        <input type="text" placeholder="Search tasks..." />
+        <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+      </div>
+    </div>
+    <section class="task-list" id="task-list">
+      <!-- Tasks will be dynamically inserted here -->
+    </section>
+    <section class="projects-section">
+      <h3>Projects</h3>
+      <div class="projects-list">
+        <div class="project-card">
+          <svg class="project-icon" viewBox="0 0 24 24"><path d="M12 2L2 7v7c0 5 10 8 10 8s10-3 10-8V7l-10-5z"/></svg>
+          <div class="project-name">TaskMaster Launch</div>
+        </div>
+        <div class="project-card">
+          <svg class="project-icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>
+          <div class="project-name">Freelance Project X</div>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+    </section>
+  </main>
+  <button class="add-button" title="Add Task" aria-label="Add Task">
+    <svg viewBox="0 0 24 24"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+  </button>
+
+  <script>
+    // Sample tasks data
+    const tasks = [
+      { id: 1, text: 'Finish UI Mockups', completed: false },
+      { id: 2, text: 'Deploy backend', completed: true },
+      { id: 3, text: 'Write release notes', completed: false },
+      { id: 4, text: 'Sot wangut', completed: false }
+    ];
+
+    const taskList = document.getElementById('task-list');
+    const progressBar = document.getElementById('progress-bar');
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      tasks.forEach(task => {
+        const taskCard = document.createElement('div');
+        taskCard.className = 'task-card';
+
+        const leftDiv = document.createElement('div');
+        leftDiv.className = 'task-left';
+
+        const checkbox = document.createElement('div');
+        checkbox.className = 'checkbox';
+        if (task.completed) checkbox.classList.add('checked');
+        checkbox.addEventListener('click', () => toggleTaskCompletion(task.id));
+
+        const taskText = document.createElement('div');
+        taskText.className = 'task-text';
+        if (task.completed) taskText.classList.add('completed');
+        taskText.textContent = task.text;
+
+        leftDiv.appendChild(checkbox);
+        leftDiv.appendChild(taskText);
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'task-actions';
+
+        // Calendar icon button
+        const calendarBtn = document.createElement('button');
+        calendarBtn.title = 'Set Due Date';
+        calendarBtn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#4fc3f7" d="M7 11h5v5H7z"/><path fill="#4fc3f7" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5z"/></svg>';
+
+        // Refresh icon button
+        const refreshBtn = document.createElement('button');
+        refreshBtn.title = 'Refresh Task';
+        refreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#4fc3f7" d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7c2.76 0 5 2.24 5 5 0 .34-.04.67-.1 1h2.02c.06-.33.08-.66.08-1 0-2.76-2.24-5-5-5z"/></svg>';
+
+        // Flag icon button
+        const flagBtn = document.createElement('button');
+        flagBtn.title = 'Flag Task';
+        flagBtn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#4fc3f7" d="M14 6V4h-4v16h2v-6h4l-2-4z"/></svg>';
+
+        // Delete icon button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.title = 'Delete Task';
+        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24"><path fill="#f44336" d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-4.5l-1-1z"/></svg>';
+        deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+        actionsDiv.appendChild(calendarBtn);
+        actionsDiv.appendChild(refreshBtn);
+        actionsDiv.appendChild(flagBtn);
+        actionsDiv.appendChild(deleteBtn);
+
+        taskCard.appendChild(leftDiv);
+        taskCard.appendChild(actionsDiv);
+
+        taskList.appendChild(taskCard);
+      });
+
+      updateProgressBar();
+    }
+
+    function toggleTaskCompletion(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        renderTasks();
+      }
+    }
+
+    function deleteTask(id) {
+      const index = tasks.findIndex(t => t.id === id);
+      if (index !== -1) {
+        tasks.splice(index, 1);
+        renderTasks();
+      }
+    }
+
+    function updateProgressBar() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      const percent = total === 0 ? 0 : (completed / total) * 100;
+      progressBar.style.width = percent + '%';
+    }
+
+    // Initial render
+    renderTasks();
+  </script>
+</body>
+</html>

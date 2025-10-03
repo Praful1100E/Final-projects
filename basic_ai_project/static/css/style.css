@@ -140,6 +140,7 @@ body {
     background: linear-gradient(90deg, #444 0%, #666 100%);
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
     transition: all 0.3s ease;
 }
 
